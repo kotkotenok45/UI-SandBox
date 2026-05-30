@@ -52,14 +52,12 @@
     </header>
 
     <main id="canvas" class="flex-1 relative overflow-hidden canvas-grid z-10">
-        <svg id="svgLayer" class="absolute inset-0 w-full h-full z-20 overflow-visible">
-            </svg>
-
-        <div id="canvasContent" class="w-full h-full absolute inset-0 z-30">
+        <svg id="svgLayer" class="absolute inset-0 w-full h-full z-20 overflow-visible" style="pointer-events: none;"></svg>
+        <div id="canvasContent" class="w-full h-full absolute inset-0 z-30" style="pointer-events: none;">
             <div id="placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-slate-600 z-0">
                 <span class="material-symbols-outlined text-5xl mb-2 text-slate-700">grid_view</span>
                 <p class="text-sm font-medium">Песочница пуста</p>
-                <p class="text-xs max-w-xs mt-1">Добавляйте интерфейсные блоки и соединительные линии через меню «Создать».</p>
+                <p class="text-xs max-w-xs mt-1">Добавляйте интерфейсные блоки и линии через меню «Создать».</p>
             </div>
         </div>
     </main>
@@ -162,178 +160,160 @@
     </div>
 
     <script>
-        const canvas = document.getElementById('canvas');
-        const canvasContent = document.getElementById('canvasContent');
-        const svgLayer = document.getElementById('svgLayer');
-        const placeholder = document.getElementById('placeholder');
-        
-        let activeElement = null;
-        let activeLine = null;
-        const CLICK_THRESHOLD = 5; 
-
-        function openSheet(id) {
-            closeAllSheets();
-            document.getElementById(id).classList.remove('sheet-hidden');
-        }
-
-        function closeAllSheets() {
-            document.querySelectorAll('.bottom-sheet').forEach(sheet => sheet.classList.add('sheet-hidden'));
-        }
-
-        function spawnElement(type) {
-            placeholder.style.display = 'none';
-            const el = document.createElement('div');
-            el.className = 'sandbox-item absolute p-4 bg-slate-800 rounded-xl border border-slate-700/60 shadow-lg touch-none select-none z-30 font-sans cursor-grab';
+        // Гарантируем запуск кода только ПОСЛЕ загрузки DOM структуры
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('canvas');
+            const canvasContent = document.getElementById('canvasContent');
+            const svgLayer = document.getElementById('svgLayer');
+            const placeholder = document.getElementById('placeholder');
             
-            const top = Math.floor(Math.random() * 25) + 20;
-            const left = Math.floor(Math.random() * 15) + 15;
-            el.style.top = `${top}%`;
-            el.style.left = `${left}%`;
-            el.style.width = '210px';
+            let activeElement = null;
+            let activeLine = null;
+            const CLICK_THRESHOLD = 5; 
 
-            if (type === 'card') {
-                el.className += ' bg-gradient-to-r from-purple-600 to-indigo-600';
-                el.innerHTML = `<h4 class="font-bold text-white text-xs pointer-events-none">Смарт-контейнер</h4><p class="text-[10px] text-purple-100/70 mt-0.5 pointer-events-none">Тапни — настроишь.</p>`;
-            } else if (type === 'button') {
-                el.style.width = '150px';
-                el.innerHTML = `<button class="w-full py-2 bg-sky-500 text-slate-950 font-black text-[10px] rounded-lg uppercase tracking-wider pointer-events-none">Кнопка</button>`;
-            } else if (type === 'text') {
-                el.style.width = '170px';
-                el.className = 'sandbox-item absolute p-1 border border-transparent touch-none z-30 cursor-grab';
-                el.innerHTML = `<p class="text-sm font-black bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent pointer-events-none">Кастомный Текст</p>`;
+            function openSheet(id) {
+                closeAllSheets();
+                const sheet = document.getElementById(id);
+                if(sheet) sheet.classList.remove('sheet-hidden');
             }
 
-            canvasContent.appendChild(el);
-            bindTouchDrag(el);
-            selectElement(el);
-            closeAllSheets();
-        }
-
-        function spawnCurve() {
-            placeholder.style.display = 'none';
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            
-            const w = canvas.clientWidth || window.innerWidth;
-            const h = canvas.clientHeight || window.innerHeight;
-            
-            path.dataset.x1 = w * 0.25; path.dataset.y1 = h * 0.35;
-            path.dataset.x2 = w * 0.70; path.dataset.y2 = h * 0.45;
-            path.dataset.curvature = "60"; 
-            
-            path.setAttribute("fill", "none");
-            path.setAttribute("stroke", "#38bdf8");
-            path.setAttribute("stroke-width", "6");
-            path.setAttribute("filter", "drop-shadow(0px 0px 8px #38bdf8)");
-            path.setAttribute("style", "cursor: pointer;");
-            path.setAttribute("class", "neon-glow-line");
-            
-            svgLayer.appendChild(path);
-            renderPath(path);
-            bindLineTouch(path);
-            selectLine(path);
-            closeAllSheets();
-        }
-
-        function renderPath(path) {
-            const x1 = parseFloat(path.dataset.x1); const y1 = parseFloat(path.dataset.y1);
-            const x2 = parseFloat(path.dataset.x2); const y2 = parseFloat(path.dataset.y2);
-            const curv = parseFloat(path.dataset.curvature);
-            const midX = (x1 + x2) / 2;
-            const midY = ((y1 + y2) / 2) + curv;
-            path.setAttribute("d", `M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}`);
-        }
-
-        function selectElement(el) {
-            unselectAll();
-            activeElement = el;
-            el.style.outline = '2px solid #38bdf8';
-            document.getElementById('styleText').value = el.innerText || '';
-            openSheet('inspectorSheet');
-        }
-
-        function selectLine(path) {
-            unselectAll();
-            activeLine = path;
-            path.classList.add('line-selected');
-            
-            document.getElementById('inputCurvature').value = path.dataset.curvature;
-            document.getElementById('curveVal').textContent = path.dataset.curvature;
-            document.getElementById('inputWidth').value = path.getAttribute('stroke-width');
-            document.getElementById('widthVal').textContent = path.getAttribute('stroke-width') + 'px';
-            
-            openSheet('lineInspectorSheet');
-        }
-
-        function unselectAll() {
-            document.querySelectorAll('.sandbox-item').forEach(i => i.style.outline = 'none');
-            document.querySelectorAll('path').forEach(p => p.classList.remove('line-selected'));
-            activeElement = null;
-            activeLine = null;
-        }
-
-        function updateLineStyle(type, val) {
-            if (!activeLine) return;
-            if (type === 'curvature') {
-                activeLine.dataset.curvature = val;
-                document.getElementById('curveVal').textContent = val;
-                renderPath(activeLine);
-            } else if (type === 'width') {
-                activeLine.setAttribute('stroke-width', val);
-                document.getElementById('widthVal').textContent = val + 'px';
-            } else if (type === 'color') {
-                activeLine.setAttribute('stroke', val);
-                activeLine.setAttribute('filter', `drop-shadow(0px 0px 10px ${val})`);
+            function closeAllSheets() {
+                document.querySelectorAll('.bottom-sheet').forEach(sheet => sheet.classList.add('sheet-hidden'));
             }
-        }
 
-        function bindTouchDrag(el) {
-            let startX, startY, initX = 0, initY = 0;
-            let hasMoved = false;
-
-            if (el.dataset.x) initX = parseFloat(el.dataset.x);
-            if (el.dataset.y) initY = parseFloat(el.dataset.y);
-            el.style.transform = `translate3d(${initX}px, ${initY}px, 0)`;
-
-            const onStart = (e) => {
-                if (e.button !== undefined && e.button !== 0) return;
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            function spawnElement(type) {
+                if(placeholder) placeholder.style.display = 'none';
+                const el = document.createElement('div');
+                el.className = 'sandbox-item absolute p-4 bg-slate-800 rounded-xl border border-slate-700/60 shadow-lg touch-none select-none z-30 font-sans cursor-grab';
+                el.style.pointerEvents = 'auto'; // Включаем кликабельность для созданного блока
                 
-                startX = clientX - initX;
-                startY = clientY - initY;
-                hasMoved = false;
+                const top = Math.floor(Math.random() * 25) + 20;
+                const left = Math.floor(Math.random() * 15) + 15;
+                el.style.top = `${top}%`;
+                el.style.left = `${left}%`;
+                el.style.width = '210px';
 
-                const onMove = (evt) => {
-                    const cX = evt.touches ? evt.touches[0].clientX : evt.clientX;
-                    const cY = evt.touches ? evt.touches[0].clientY : evt.clientY;
-                    let curX = cX - startX;
-                    let curY = cY - startY;
+                if (type === 'card') {
+                    el.className += ' bg-gradient-to-r from-purple-600 to-indigo-600';
+                    el.innerHTML = `<h4 class="font-bold text-white text-xs pointer-events-none">Смарт-контейнер</h4><p class="text-[10px] text-purple-100/70 mt-0.5 pointer-events-none">Тапни — настроишь.</p>`;
+                } else if (type === 'button') {
+                    el.style.width = '150px';
+                    el.innerHTML = `<button class="w-full py-2 bg-sky-500 text-slate-950 font-black text-[10px] rounded-lg uppercase tracking-wider pointer-events-none">Кнопка</button>`;
+                } else if (type === 'text') {
+                    el.style.width = '170px';
+                    el.className = 'sandbox-item absolute p-1 border border-transparent touch-none z-30 cursor-grab';
+                    el.style.pointerEvents = 'auto';
+                    el.innerHTML = `<p class="text-sm font-black bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent pointer-events-none">Кастомный Текст</p>`;
+                }
 
-                    if (Math.abs(curX - initX) > CLICK_THRESHOLD || Math.abs(curY - initY) > CLICK_THRESHOLD) {
-                        hasMoved = true;
-                    }
+                if(canvasContent) canvasContent.appendChild(el);
+                bindTouchDrag(el);
+                selectElement(el);
+                closeAllSheets();
+            }
 
-                    initX = curX; initY = curY;
-                    el.dataset.x = initX; el.dataset.y = initY;
-                    el.style.transform = `translate3d(${initX}px, ${initY}px, 0)`;
-                };
+            function spawnCurve() {
+                if(placeholder) placeholder.style.display = 'none';
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                
+                const w = canvas ? canvas.clientWidth : window.innerWidth;
+                const h = canvas ? canvas.clientHeight : window.innerHeight;
+                
+                path.dataset.x1 = w * 0.25; path.dataset.y1 = h * 0.35;
+                path.dataset.x2 = w * 0.70; path.dataset.y2 = h * 0.45;
+                path.dataset.curvature = "60"; 
+                
+                path.setAttribute("fill", "none");
+                path.setAttribute("stroke", "#38bdf8");
+                path.setAttribute("stroke-width", "6");
+                path.setAttribute("filter", "drop-shadow(0px 0px 8px #38bdf8)");
+                path.setAttribute("style", "cursor: pointer; pointer-events: stroke;");
+                path.setAttribute("class", "neon-glow-line");
+                
+                if(svgLayer) svgLayer.appendChild(path);
+                renderPath(path);
+                bindLineTouch(path);
+                selectLine(path);
+                closeAllSheets();
+            }
 
-                const onEnd = () => {
-                    window.removeEventListener('touchmove', onMove);
-                    window.removeEventListener('mousemove', onMove);
-                    window.removeEventListener('touchend', onEnd);
-                    window.removeEventListener('mouseup', onEnd);
-                    if (!hasMoved) selectElement(el);
-                };
+            function renderPath(path) {
+                const x1 = parseFloat(path.dataset.x1); const y1 = parseFloat(path.dataset.y1);
+                const x2 = parseFloat(path.dataset.x2); const y2 = parseFloat(path.dataset.y2);
+                const curv = parseFloat(path.dataset.curvature);
+                const midX = (x1 + x2) / 2;
+                const midY = ((y1 + y2) / 2) + curv;
+                path.setAttribute("d", `M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}`);
+            }
 
-                window.addEventListener('touchmove', onMove, {passive: false});
-                window.addEventListener('mousemove', onMove);
-                window.addEventListener('touchend', onEnd);
-                window.addEventListener('mouseup', onEnd);
-            };
+            function selectElement(el) {
+                unselectAll();
+                activeElement = el;
+                el.style.outline = '2px solid #38bdf8';
+                const input = document.getElementById('styleText');
+                if(input) input.value = el.innerText || '';
+                openSheet('inspectorSheet');
+            }
 
-            el.addEventListener('touchstart', onStart, {passive: true});
-            el.addEventListener('mousedown', onStart);
-        }
+            function selectLine(path) {
+                unselectAll();
+                activeLine = path;
+                path.classList.add('line-selected');
+                
+                const inputCurv = document.getElementById('inputCurvature');
+                const curvVal = document.getElementById('curveVal');
+                const inputW = document.getElementById('inputWidth');
+                const widthVal = document.getElementById('widthVal');
 
-        function bindLineTo
+                if(inputCurv) inputCurv.value = path.dataset.curvature;
+                if(curvVal) curvVal.textContent = path.dataset.curvature;
+                if(inputW) inputW.value = path.getAttribute('stroke-width');
+                if(widthVal) widthVal.textContent = path.getAttribute('stroke-width') + 'px';
+                
+                openSheet('lineInspectorSheet');
+            }
+
+            function unselectAll() {
+                document.querySelectorAll('.sandbox-item').forEach(i => i.style.outline = 'none');
+                document.querySelectorAll('path').forEach(p => p.classList.remove('line-selected'));
+                activeElement = null;
+                activeLine = null;
+            }
+
+            function updateLineStyle(type, val) {
+                if (!activeLine) return;
+                if (type === 'curvature') {
+                    activeLine.dataset.curvature = val;
+                    const cVal = document.getElementById('curveVal');
+                    if(cVal) cVal.textContent = val;
+                    renderPath(activeLine);
+                } else if (type === 'width') {
+                    activeLine.setAttribute('stroke-width', val);
+                    const wVal = document.getElementById('widthVal');
+                    if(wVal) wVal.textContent = val + 'px';
+                } else if (type === 'color') {
+                    activeLine.setAttribute('stroke', val);
+                    activeLine.setAttribute('filter', `drop-shadow(0px 0px 10px ${val})`);
+                }
+            }
+
+            function bindTouchDrag(el) {
+                let startX, startY, initX = 0, initY = 0;
+                let hasMoved = false;
+
+                if (el.dataset.x) initX = parseFloat(el.dataset.x);
+                if (el.dataset.y) initY = parseFloat(el.dataset.y);
+                el.style.transform = `translate3d(${initX}px, ${initY}px, 0)`;
+
+                const onStart = (e) => {
+                    if (e.button !== undefined && e.button !== 0) return;
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    
+                    startX = clientX - initX;
+                    startY = clientY - initY;
+                    hasMoved = false;
+
+                    const onMove = (evt) => {
+                        const cX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+                        const cY = evt.touches ? ev
