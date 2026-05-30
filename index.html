@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>UI Sandbox</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" />
@@ -16,48 +16,52 @@
         .neon-line { transition: stroke-width 0.1s, filter 0.2s; }
         .line-active { stroke-dasharray: 4; animation: dash 0.8s linear infinite; }
         @keyframes dash { to { stroke-dashoffset: -20; } }
+        
+        /* Скрытие скроллбаров в панелях */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-[#0b0f19] text-slate-200 h-screen w-screen overflow-hidden flex flex-col font-sans select-none m-0 p-0">
 
-    <header class="h-12 border-b border-slate-800/80 flex items-center justify-between px-4 bg-[#0d1324] shrink-0 z-50">
-        <div class="flex items-center gap-2">
+    <header class="h-14 md:h-12 border-b border-slate-800/80 flex items-center justify-between px-3 md:px-4 bg-[#0d1324] shrink-0 z-50">
+        <div class="flex items-center gap-1.5">
             <span class="material-symbols-outlined text-sky-400 text-lg">widgets</span>
-            <span class="font-bold text-xs tracking-wider uppercase text-slate-300">UI Sandbox</span>
+            <span class="font-bold text-[11px] md:text-xs tracking-wider uppercase text-slate-300 hidden sm:inline">UI Sandbox</span>
         </div>
         
-        <div class="flex items-center gap-1 bg-slate-900/60 p-1 border border-slate-800 rounded-lg text-[11px]">
-            <button id="addCard" class="px-2.5 py-1 hover:bg-slate-800 text-purple-400 rounded flex items-center gap-1 cursor-pointer font-medium transition"><span class="material-symbols-outlined text-sm">layers</span> Карта</button>
-            <button id="addButton" class="px-2.5 py-1 hover:bg-slate-800 text-sky-400 rounded flex items-center gap-1 cursor-pointer font-medium transition"><span class="material-symbols-outlined text-sm">smart_button</span> Кнопка</button>
-            <button id="addText" class="px-2.5 py-1 hover:bg-slate-800 text-amber-400 rounded flex items-center gap-1 cursor-pointer font-medium transition"><span class="material-symbols-outlined text-sm">text_fields</span> Текст</button>
-            <button id="addLine" class="px-2.5 py-1 hover:bg-indigo-950 text-indigo-400 rounded flex items-center gap-1 cursor-pointer font-medium transition"><span class="material-symbols-outlined text-sm">timeline</span> Линия</button>
+        <div class="flex items-center gap-1 bg-slate-900/60 p-1 border border-slate-800 rounded-lg text-[10px] md:text-[11px] overflow-x-auto no-scrollbar max-w-[75%] sm:max-w-none">
+            <button id="addCard" class="px-2 py-1 hover:bg-slate-800 text-purple-400 rounded flex items-center gap-1 cursor-pointer font-medium whitespace-nowrap"><span class="material-symbols-outlined text-sm">layers</span> Карта</button>
+            <button id="addButton" class="px-2 py-1 hover:bg-slate-800 text-sky-400 rounded flex items-center gap-1 cursor-pointer font-medium whitespace-nowrap"><span class="material-symbols-outlined text-sm">smart_button</span> Кнопка</button>
+            <button id="addText" class="px-2 py-1 hover:bg-slate-800 text-amber-400 rounded flex items-center gap-1 cursor-pointer font-medium whitespace-nowrap"><span class="material-symbols-outlined text-sm">text_fields</span> Текст</button>
+            <button id="addLine" class="px-2 py-1 hover:bg-indigo-950 text-indigo-400 rounded flex items-center gap-1 cursor-pointer font-medium whitespace-nowrap"><span class="material-symbols-outlined text-sm">timeline</span> Линия</button>
         </div>
 
-        <div class="flex items-center gap-2">
-            <button id="hdrClear" class="p-1.5 hover:bg-rose-950/30 rounded-lg text-rose-400 flex items-center cursor-pointer transition" title="Очистить всё">
+        <div class="flex items-center">
+            <button id="hdrClear" class="p-1.5 hover:bg-rose-950/30 rounded-lg text-rose-400 flex items-center cursor-pointer" title="Очистить всё">
                 <span class="material-symbols-outlined text-lg">delete</span>
             </button>
         </div>
     </header>
 
-    <div class="flex-1 flex relative overflow-hidden">
+    <div class="flex-1 flex flex-col md:flex-row relative overflow-hidden">
         
         <main id="sandboxCanvas" class="flex-1 relative overflow-hidden canvas-grid bg-[#070a13]">
             <svg id="canvasSvg" class="absolute inset-0 w-full h-full pointer-events-none z-10 overflow-visible"></svg>
             <div id="canvasHtml" class="absolute inset-0 w-full h-full pointer-events-none z-20"></div>
 
-            <div id="canvasPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-center text-slate-600 pointer-events-none">
-                <p class="text-xs font-mono">// холст пуст. кликни инструмент сверху для добавления</p>
+            <div id="canvasPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-center text-slate-600 p-4 pointer-events-none">
+                <p class="text-[10px] md:text-xs font-mono">// холст пуст. выберите инструмент сверху</p>
             </div>
         </main>
 
-        <aside id="inspectorPanel" class="w-64 border-l border-slate-800/80 bg-[#0d1324] p-4 flex flex-col gap-4 transform translate-x-full transition-transform duration-200 z-30 text-[11px]">
+        <aside id="inspectorPanel" class="w-full md:w-64 border-t md:border-t-0 md:border-l border-slate-800/80 bg-[#0d1324] p-4 flex flex-col gap-3 transform translate-y-full md:translate-y-0 md:translate-x-full transition-transform duration-200 z-30 text-[11px] fixed bottom-0 left-0 right-0 md:relative md:bottom-auto md:left-auto md:right-auto max-h-[50vh] md:max-h-none overflow-y-auto no-scrollbar shadow-2xl md:shadow-none">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
                 <span class="font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1"><span class="material-symbols-outlined text-sm">tune</span> Свойства</span>
-                <button id="btnCloseInspector" class="text-slate-500 hover:text-slate-300 text-sm cursor-pointer">&times;</button>
+                <button id="btnCloseInspector" class="text-slate-500 hover:text-slate-300 text-base md:text-sm p-1 cursor-pointer">&times;</button>
             </div>
 
-            <div id="sectionBlockProps" class="hidden space-y-4">
+            <div id="sectionBlockProps" class="hidden space-y-3">
                 <div>
                     <label class="block text-slate-400 mb-1">Текст элемента:</label>
                     <input type="text" id="insBlockText" class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-slate-200 focus:outline-none focus:border-sky-500">
@@ -72,16 +76,16 @@
                         <option value="cyber">Киберпанк (Border)</option>
                     </select>
                 </div>
-                <div class="flex gap-2 pt-2">
-                    <button id="btnDuplicateBlock" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded cursor-pointer transition">Дублировать</button>
-                    <button id="btnDeleteBlock" class="px-2 py-1.5 bg-rose-950/40 border border-rose-800/60 text-rose-400 font-bold rounded hover:bg-rose-900/40 cursor-pointer transition">Удалить</button>
+                <div class="flex gap-2 pt-1">
+                    <button id="btnDuplicateBlock" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded cursor-pointer text-center">Дублировать</button>
+                    <button id="btnDeleteBlock" class="px-3 py-1.5 bg-rose-950/40 border border-rose-800/60 text-rose-400 font-bold rounded hover:bg-rose-900/40 cursor-pointer">Удалить</button>
                 </div>
             </div>
 
-            <div id="sectionLineProps" class="hidden space-y-4">
+            <div id="sectionLineProps" class="hidden space-y-3">
                 <div>
                     <div class="flex justify-between text-slate-400 mb-1"><span>Изгиб кривой:</span><span id="valCurvature" class="font-mono text-indigo-400">0</span></div>
-                    <input type="range" id="insLineCurvature" min="-200" max="200" value="40" class="w-full h-1 bg-slate-800 rounded appearance-none accent-indigo-500">
+                    <input type="range" id="insLineCurvature" min="-180" max="180" value="40" class="w-full h-1 bg-slate-800 rounded appearance-none accent-indigo-500">
                 </div>
                 <div>
                     <div class="flex justify-between text-slate-400 mb-1"><span>Толщина:</span><span id="valWidth" class="font-mono text-indigo-400">4px</span></div>
@@ -89,15 +93,15 @@
                 </div>
                 <div>
                     <label class="block text-slate-400 mb-1">Цвет неона:</label>
-                    <div class="grid grid-cols-2 gap-1.5" id="insLineColorGrid">
+                    <div class="grid grid-cols-4 md:grid-cols-2 gap-1.5" id="insLineColorGrid">
                         <button data-color="#38bdf8" class="p-1.5 bg-sky-500 text-slate-950 font-bold rounded cursor-pointer text-[10px]">Циан</button>
                         <button data-color="#a855f7" class="p-1.5 bg-purple-500 text-white font-bold rounded cursor-pointer text-[10px]">Пурпур</button>
                         <button data-color="#f43f5e" class="p-1.5 bg-rose-500 text-white font-bold rounded cursor-pointer text-[10px]">Роза</button>
                         <button data-color="#eab308" class="p-1.5 bg-yellow-500 text-slate-950 font-bold rounded cursor-pointer text-[10px]">Лайм</button>
                     </div>
                 </div>
-                <div class="pt-2">
-                    <button id="btnDeleteLine" class="w-full py-1.5 bg-rose-950/40 border border-rose-800/60 text-rose-400 font-bold rounded hover:bg-rose-900/40 cursor-pointer transition">Удалить линию</button>
+                <div class="pt-1">
+                    <button id="btnDeleteLine" class="w-full py-1.5 bg-rose-950/40 border border-rose-800/60 text-rose-400 font-bold rounded hover:bg-rose-900/40 cursor-pointer">Удалить линию</button>
                 </div>
             </div>
         </aside>
@@ -117,10 +121,18 @@
 
             let activeElement = null;
             let activeLine = null;
-            const MOVE_THRESHOLD = 4;
+            const MOVE_THRESHOLD = 5;
+
+            // Проверка устройства
+            const isMobile = () => window.innerWidth < 768;
 
             function showInspector(type) {
-                inspector.classList.remove('translate-x-full');
+                if (isMobile()) {
+                    inspector.classList.remove('translate-y-full');
+                } else {
+                    inspector.classList.remove('translate-x-full');
+                }
+                
                 if (type === 'block') {
                     secBlock.classList.remove('hidden');
                     secLine.classList.add('hidden');
@@ -131,7 +143,7 @@
             }
 
             function closeInspector() {
-                inspector.classList.add('translate-x-full');
+                inspector.classList.add('translate-y-full', 'translate-x-full');
                 unselectAll();
             }
 
@@ -146,45 +158,26 @@
                 placeholder.style.display = (canvasHtml.children.length === 0 && canvasSvg.children.length === 0) ? 'flex' : 'none';
             }
 
-            // --- БЛОКИ ---
-            function createBlock(type) {
-                placeholder.style.display = 'none';
-                const item = document.createElement('div');
-                item.className = 'sandbox-item absolute p-3 bg-slate-800/90 border border-slate-700/60 rounded-lg shadow-md pointer-events-auto cursor-grab text-xs font-medium z-20';
-                
-                // Спавн в центре видимой области ПК
-                item.style.left = '150px';
-                item.style.top = '120px';
-                item.style.width = '180px';
-
-                if (type === 'card') {
-                    item.className += ' bg-gradient-to-r from-purple-600/80 to-indigo-600/80';
-                    item.innerHTML = `<h4 class="font-bold text-white text-[11px] pointer-events-none">Контейнер</h4><p class="text-[10px] text-purple-200/60 pointer-events-none">Sandbox Item</p>`;
-                } else if (type === 'button') {
-                    item.style.width = '130px';
-                    item.innerHTML = `<button class="w-full py-1 bg-sky-500 text-slate-950 font-bold text-[10px] rounded uppercase tracking-wider pointer-events-none">Кнопка</button>`;
-                } else if (type === 'text') {
-                    item.className = 'sandbox-item absolute p-1 pointer-events-auto cursor-grab text-xs font-bold z-20';
-                    item.innerHTML = `<p class="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent pointer-events-none">Простой текст</p>`;
-                }
-
-                canvasHtml.appendChild(item);
-                bindDrag(item);
-                selectBlock(item);
-            }
-
-            function bindDrag(el) {
+            // --- УНИВЕРСАЛЬНЫЙ ДРАГ ДЛЯ СМАРТФОНОВ И ПК ---
+            function setupUniversalDrag(el, onSelect) {
                 let x = parseFloat(el.dataset.x || 0), y = parseFloat(el.dataset.y || 0);
                 el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
 
                 const start = (e) => {
                     if (e.button !== undefined && e.button !== 0) return;
-                    const sX = e.clientX - x, sY = e.clientY - y;
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    
+                    const sX = clientX - x, sY = clientY - y;
                     let moved = false;
 
                     const move = (evt) => {
-                        let nx = evt.clientX - sX, ny = evt.clientY - sY;
+                        const moveX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+                        const moveY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+                        
+                        let nx = moveX - sX, ny = moveY - sY;
                         if (Math.abs(nx - x) > MOVE_THRESHOLD || Math.abs(ny - y) > MOVE_THRESHOLD) moved = true;
+                        
                         x = nx; y = ny;
                         el.dataset.x = x; el.dataset.y = y;
                         el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
@@ -192,13 +185,49 @@
 
                     const end = () => {
                         window.removeEventListener('mousemove', move);
+                        window.removeEventListener('touchmove', move);
                         window.removeEventListener('mouseup', end);
-                        if (!moved) selectBlock(el);
+                        window.removeEventListener('touchend', end);
+                        if (!moved) onSelect();
                     };
+
                     window.addEventListener('mousemove', move);
+                    window.addEventListener('touchmove', move, {passive: false});
                     window.addEventListener('mouseup', end);
+                    window.addEventListener('touchend', end);
                 };
+
                 el.addEventListener('mousedown', start);
+                el.addEventListener('touchstart', start, {passive: true});
+            }
+
+            // --- БЛОКИ ---
+            function createBlock(type) {
+                placeholder.style.display = 'none';
+                const item = document.createElement('div');
+                item.className = 'sandbox-item absolute p-3 bg-slate-800/90 border border-slate-700/60 rounded-lg shadow-md pointer-events-auto cursor-grab text-xs font-medium z-20';
+                
+                // Центрируем спавн с учетом мобильного экрана
+                const spawnX = isMobile() ? 40 : 120;
+                const spawnY = isMobile() ? 60 : 100;
+                item.style.left = `${spawnX}px`;
+                item.style.top = `${spawnY}px`;
+                item.style.width = isMobile() ? '150px' : '180px';
+
+                if (type === 'card') {
+                    item.className += ' bg-gradient-to-r from-purple-600/80 to-indigo-600/80';
+                    item.innerHTML = `<h4 class="font-bold text-white text-[11px] pointer-events-none">Контейнер</h4><p class="text-[10px] text-purple-200/60 pointer-events-none">Sandbox Item</p>`;
+                } else if (type === 'button') {
+                    item.style.width = isMobile() ? '110px' : '130px';
+                    item.innerHTML = `<button class="w-full py-1 bg-sky-500 text-slate-950 font-bold text-[10px] rounded uppercase tracking-wider pointer-events-none">Кнопка</button>`;
+                } else if (type === 'text') {
+                    item.className = 'sandbox-item absolute p-1 pointer-events-auto cursor-grab text-xs font-bold z-20';
+                    item.innerHTML = `<p class="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent pointer-events-none">Простой текст</p>`;
+                }
+
+                canvasHtml.appendChild(item);
+                setupUniversalDrag(item, () => selectBlock(item));
+                selectBlock(item);
             }
 
             function selectBlock(el) {
@@ -214,9 +243,10 @@
                 placeholder.style.display = 'none';
                 const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 
-                path.dataset.x1 = "100"; path.dataset.y1 = "150";
-                path.dataset.x2 = "300"; path.dataset.y2 = "150";
-                path.dataset.curvature = "40";
+                const w = isMobile() ? 80 : 100;
+                path.dataset.x1 = w; path.dataset.y1 = "120";
+                path.dataset.x2 = w + (isMobile() ? 150 : 200); path.dataset.y2 = "120";
+                path.dataset.curvature = "30";
 
                 path.setAttribute("fill", "none");
                 path.setAttribute("stroke", "#38bdf8");
@@ -227,7 +257,7 @@
 
                 canvasSvg.appendChild(path);
                 renderLine(path);
-                bindLineDrag(path);
+                setupLineDrag(path);
                 selectLine(path);
             }
 
@@ -238,13 +268,20 @@
                 path.setAttribute("d", `M ${x1} ${y1} Q ${(x1+x2)/2} ${((y1+y2)/2)+c} ${x2} ${y2}`);
             }
 
-            function bindLineDrag(path) {
+            function setupLineDrag(path) {
                 let sX = 0, sY = 0, moved = false;
+                
                 const start = (e) => {
-                    sX = e.clientX; sY = e.clientY;
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    sX = clientX; sY = clientY;
                     moved = false;
+                    
                     const move = (evt) => {
-                        const dx = evt.clientX - sX, dy = evt.clientY - sY;
+                        const moveX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+                        const moveY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+                        
+                        const dx = moveX - sX, dy = moveY - sY;
                         if (Math.abs(dx) > MOVE_THRESHOLD || Math.abs(dy) > MOVE_THRESHOLD) moved = true;
                         
                         path.dataset.x1 = parseFloat(path.dataset.x1) + dx;
@@ -253,17 +290,24 @@
                         path.dataset.y2 = parseFloat(path.dataset.y2) + dy;
                         
                         renderLine(path);
-                        sX = evt.clientX; sY = evt.clientY;
+                        sX = moveX; sY = moveY;
                     };
+                    
                     const end = () => {
                         window.removeEventListener('mousemove', move);
+                        window.removeEventListener('touchmove', move);
                         window.removeEventListener('mouseup', end);
+                        window.removeEventListener('touchend', end);
                         if (!moved) selectLine(path);
                     };
+                    
                     window.addEventListener('mousemove', move);
+                    window.addEventListener('touchmove', move, {passive: false});
                     window.addEventListener('mouseup', end);
+                    window.addEventListener('touchend', end);
                 };
                 path.addEventListener('mousedown', start);
+                path.addEventListener('touchstart', start, {passive: true});
             }
 
             function selectLine(path) {
@@ -278,7 +322,7 @@
                 showInspector('line');
             }
 
-            // --- ОБРАБОТЧИКИ СВОЙСТВ ---
+            // --- ИНСПЕКТОР И СТЫКОВКА СВОЙСТВ ---
             document.getElementById('insBlockText').addEventListener('input', (e) => {
                 if (!activeElement) return;
                 (activeElement.querySelector('h4, p, button') || activeElement).innerText = e.target.value;
@@ -292,52 +336,4 @@
                 if (val === 'grad1') activeElement.classList.add('bg-gradient-to-r', 'from-purple-600/80', 'to-pink-500/80');
                 if (val === 'grad2') activeElement.classList.add('bg-gradient-to-br', 'from-cyan-500/80', 'to-blue-600/80');
                 if (val === 'glass') activeElement.classList.add('bg-white/5', 'backdrop-blur-sm', 'border-white/10');
-                if (val === 'cyber') activeElement.classList.add('bg-black', 'border', 'border-yellow-400/80');
-            });
-
-            document.getElementById('btnDuplicateBlock').addEventListener('click', () => {
-                if (!activeElement) return;
-                const clone = activeElement.cloneNode(true);
-                clone.style.outline = 'none';
-                const nx = parseFloat(activeElement.dataset.x || 0) + 20, ny = parseFloat(activeElement.dataset.y || 0) + 20;
-                clone.dataset.x = nx; clone.dataset.y = ny;
-                clone.style.transform = `translate3d(${nx}px, ${ny}px, 0)`;
-                canvasHtml.appendChild(clone);
-                bindDrag(clone);
-                selectBlock(clone);
-            });
-
-            document.getElementById('btnDeleteBlock').addEventListener('click', () => { if (activeElement) activeElement.remove(); closeInspector(); syncPlaceholder(); });
-
-            document.getElementById('insLineCurvature').addEventListener('input', (e) => {
-                if (!activeLine) return;
-                activeLine.dataset.curvature = e.target.value;
-                document.getElementById('valCurvature').textContent = e.target.value;
-                renderLine(activeLine);
-            });
-
-            document.getElementById('insLineWidth').addEventListener('input', (e) => {
-                if (!activeLine) return;
-                activeLine.setAttribute('stroke-width', e.target.value);
-                document.getElementById('valWidth').textContent = e.target.value + 'px';
-            });
-
-            document.getElementById('insLineColorGrid').addEventListener('click', (e) => {
-                const b = e.target.closest('button');
-                if (!b || !activeLine) return;
-                activeLine.setAttribute('stroke', b.dataset.color);
-                activeLine.setAttribute('filter', `drop-shadow(0px 0px 8px ${b.dataset.color})`);
-            });
-
-            document.getElementById('btnDeleteLine').addEventListener('click', () => { if (activeLine) activeLine.remove(); closeInspector(); syncPlaceholder(); });
-
-            // --- КНОПКИ УПРАВЛЕНИЯ ---
-            document.getElementById('addCard').addEventListener('click', () => createBlock('card'));
-            document.getElementById('addButton').addEventListener('click', () => createBlock('button'));
-            document.getElementById('addText').addEventListener('click', () => createBlock('text'));
-            document.getElementById('addLine').addEventListener('click', createLine);
-            document.getElementById('btnCloseInspector').addEventListener('click', closeInspector);
-            
-            document.getElementById('hdrClear').addEventListener('click', () => {
-                canvasHtml.innerHTML = ''; canvasSvg.innerHTML = '';
-            
+                if 
