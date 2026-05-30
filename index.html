@@ -34,27 +34,28 @@
 </head>
 <body class="bg-[#060913] text-slate-100 h-screen w-screen overflow-hidden flex flex-col font-sans select-none m-0 p-0">
 
-    <header class="h-14 border-b border-slate-800 flex items-center justify-between px-4 bg-[#0a101f] shrink-0 relative z-[99999]">
+    <header class="h-14 border-b border-slate-800 flex items-center justify-between px-4 bg-[#0a101f] shrink-0 relative z-[999999]">
         <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-sky-400">widgets</span>
             <span class="font-bold text-sm tracking-wide bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">UI Sandbox</span>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 relative z-[9999999]">
             <button id="pwaInstallBtn" class="hidden py-1.5 px-2.5 bg-amber-500 text-slate-950 rounded-lg text-xs font-bold flex items-center gap-1 shadow-md cursor-pointer">
                 <span class="material-symbols-outlined text-sm">download</span> Установить
             </button>
-            <button id="btnTemplates" class="p-2 hover:bg-slate-800 rounded-xl text-slate-400 flex items-center cursor-pointer"><span class="material-symbols-outlined text-xl">folder</span></button>
-            <button id="btnClear" class="p-2 hover:bg-rose-950/40 rounded-xl text-rose-400 flex items-center cursor-pointer"><span class="material-symbols-outlined text-xl">delete</span></button>
-            <button id="btnCreate" class="py-2 px-4 bg-sky-500 hover:bg-sky-400 text-slate-950 rounded-xl text-xs font-black flex items-center gap-1 shadow-lg cursor-pointer">
+            <button id="btnTemplates" class="p-2 hover:bg-slate-800 rounded-xl text-slate-400 flex items-center cursor-pointer relative z-[9999999]"><span class="material-symbols-outlined text-xl">folder</span></button>
+            <button id="btnClear" class="p-2 hover:bg-rose-950/40 rounded-xl text-rose-400 flex items-center cursor-pointer relative z-[9999999]"><span class="material-symbols-outlined text-xl">delete</span></button>
+            <button id="btnCreate" class="py-2 px-4 bg-sky-500 hover:bg-sky-400 text-slate-950 rounded-xl text-xs font-black flex items-center gap-1 shadow-lg cursor-pointer relative z-[9999999]">
                 <span class="material-symbols-outlined text-sm font-bold">add</span> Создать
             </button>
         </div>
     </header>
 
     <main id="canvas" class="flex-1 relative overflow-hidden canvas-grid z-10">
-        <svg id="svgLayer" class="absolute inset-0 w-full h-full z-20 overflow-visible" style="pointer-events: none;"></svg>
-        <div id="canvasContent" class="w-full h-full absolute inset-0 z-30" style="pointer-events: none;">
-            <div id="placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-slate-600 z-0">
+        <svg id="svgLayer" class="absolute inset-0 w-full h-full z-20 overflow-visible"></svg>
+        
+        <div id="canvasContent" class="w-full h-full absolute inset-0 z-30">
+            <div id="placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-slate-600 z-0 pointer-events-none">
                 <span class="material-symbols-outlined text-5xl mb-2 text-slate-700">grid_view</span>
                 <p class="text-sm font-medium">Песочница пуста</p>
                 <p class="text-xs max-w-xs mt-1">Добавляйте интерфейсные блоки и линии через меню «Создать».</p>
@@ -160,7 +161,6 @@
     </div>
 
     <script>
-        // Гарантируем запуск кода только ПОСЛЕ загрузки DOM структуры
         document.addEventListener('DOMContentLoaded', () => {
             const canvas = document.getElementById('canvas');
             const canvasContent = document.getElementById('canvasContent');
@@ -185,7 +185,6 @@
                 if(placeholder) placeholder.style.display = 'none';
                 const el = document.createElement('div');
                 el.className = 'sandbox-item absolute p-4 bg-slate-800 rounded-xl border border-slate-700/60 shadow-lg touch-none select-none z-30 font-sans cursor-grab';
-                el.style.pointerEvents = 'auto'; // Включаем кликабельность для созданного блока
                 
                 const top = Math.floor(Math.random() * 25) + 20;
                 const left = Math.floor(Math.random() * 15) + 15;
@@ -202,7 +201,6 @@
                 } else if (type === 'text') {
                     el.style.width = '170px';
                     el.className = 'sandbox-item absolute p-1 border border-transparent touch-none z-30 cursor-grab';
-                    el.style.pointerEvents = 'auto';
                     el.innerHTML = `<p class="text-sm font-black bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent pointer-events-none">Кастомный Текст</p>`;
                 }
 
@@ -316,4 +314,8 @@
 
                     const onMove = (evt) => {
                         const cX = evt.touches ? evt.touches[0].clientX : evt.clientX;
-                        const cY = evt.touches ? ev
+                        const cY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+                        let curX = cX - startX;
+                        let curY = cY - startY;
+
+                        if (Math.a
