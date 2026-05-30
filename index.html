@@ -18,9 +18,14 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
         .bottom-sheet {
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.25s;
+            visibility: visible;
         }
-        .sheet-hidden { transform: translateY(100%); }
+        /* Когда шторка скрыта, мы полностью убираем её из интерактивного поля с помощью visibility: hidden */
+        .sheet-hidden { 
+            transform: translateY(100%); 
+            visibility: hidden; 
+        }
         
         .neon-glow-line {
             transition: stroke-width 0.1s, filter 0.2s;
@@ -34,36 +39,36 @@
 </head>
 <body class="bg-[#060913] text-slate-100 h-screen w-screen overflow-hidden flex flex-col font-sans select-none m-0 p-0">
 
-    <header class="h-14 border-b border-slate-800 flex items-center justify-between px-4 bg-[#0a101f] shrink-0 relative z-[999999]">
+    <header class="h-14 border-b border-slate-800 flex items-center justify-between px-4 bg-[#0a101f] shrink-0 relative z-[9999]">
         <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-sky-400">widgets</span>
             <span class="font-bold text-sm tracking-wide bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">UI Sandbox</span>
         </div>
-        <div class="flex items-center gap-2 relative z-[9999999]">
+        <div class="flex items-center gap-2">
             <button id="pwaInstallBtn" class="hidden py-1.5 px-2.5 bg-amber-500 text-slate-950 rounded-lg text-xs font-bold flex items-center gap-1 shadow-md cursor-pointer">
                 <span class="material-symbols-outlined text-sm">download</span> Установить
             </button>
-            <button id="btnTemplates" class="p-2 hover:bg-slate-800 rounded-xl text-slate-400 flex items-center cursor-pointer relative z-[9999999]"><span class="material-symbols-outlined text-xl">folder</span></button>
-            <button id="btnClear" class="p-2 hover:bg-rose-950/40 rounded-xl text-rose-400 flex items-center cursor-pointer relative z-[9999999]"><span class="material-symbols-outlined text-xl">delete</span></button>
-            <button id="btnCreate" class="py-2 px-4 bg-sky-500 hover:bg-sky-400 text-slate-950 rounded-xl text-xs font-black flex items-center gap-1 shadow-lg cursor-pointer relative z-[9999999]">
+            <button id="btnTemplates" class="p-2 hover:bg-slate-800 rounded-xl text-slate-400 flex items-center cursor-pointer"><span class="material-symbols-outlined text-xl">folder</span></button>
+            <button id="btnClear" class="p-2 hover:bg-rose-950/40 rounded-xl text-rose-400 flex items-center cursor-pointer"><span class="material-symbols-outlined text-xl">delete</span></button>
+            <button id="btnCreate" class="py-2 px-4 bg-sky-500 hover:bg-sky-400 text-slate-950 rounded-xl text-xs font-black flex items-center gap-1 shadow-lg cursor-pointer">
                 <span class="material-symbols-outlined text-sm font-bold">add</span> Создать
             </button>
         </div>
     </header>
 
-    <main id="canvas" class="flex-1 relative overflow-hidden canvas-grid z-10">
+    <main id="canvas" class="w-full h-[calc(100vh-3.5rem)] relative overflow-hidden canvas-grid z-10 block">
         <svg id="svgLayer" class="absolute inset-0 w-full h-full z-20 overflow-visible"></svg>
         
         <div id="canvasContent" class="w-full h-full absolute inset-0 z-30">
             <div id="placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-slate-600 z-0 pointer-events-none">
                 <span class="material-symbols-outlined text-5xl mb-2 text-slate-700">grid_view</span>
                 <p class="text-sm font-medium">Песочница пуста</p>
-                <p class="text-xs max-w-xs mt-1">Добавляйте интерфейсные блоки и линии через меню «Создать».</p>
+                <p class="text-xs max-w-xs mt-1">Добавляйте интерфейсные blocks и линии через меню «Создать».</p>
             </div>
         </div>
     </main>
 
-    <div id="creatorSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-slate-800 rounded-t-2xl shadow-2xl z-[999999] p-4 pb-6">
+    <div id="creatorSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-slate-800 rounded-t-2xl shadow-2xl z-[50000] p-4 pb-6">
         <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer close-sheet-trigger"></div>
         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Добавить на холст</h3>
         <div class="grid grid-cols-2 gap-3 text-xs font-medium">
@@ -74,7 +79,7 @@
         </div>
     </div>
 
-    <div id="lineInspectorSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-indigo-900/50 rounded-t-2xl shadow-2xl z-[999999] p-4 max-h-[80vh] overflow-y-auto no-scrollbar pb-6">
+    <div id="lineInspectorSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-indigo-900/50 rounded-t-2xl shadow-2xl z-[50000] p-4 max-h-[80vh] overflow-y-auto no-scrollbar pb-6">
         <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-3 cursor-pointer close-sheet-trigger"></div>
         <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-4">
             <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-sm">polyline</span>Параметры линии</span>
@@ -104,7 +109,7 @@
         </div>
     </div>
 
-    <div id="inspectorSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-sky-900/40 rounded-t-2xl shadow-2xl z-[999999] p-4 max-h-[80vh] overflow-y-auto no-scrollbar pb-6">
+    <div id="inspectorSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-sky-900/40 rounded-t-2xl shadow-2xl z-[50000] p-4 max-h-[80vh] overflow-y-auto no-scrollbar pb-6">
         <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-3 cursor-pointer close-sheet-trigger"></div>
         <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-4">
             <span class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-sm">tune</span> Стили элемента</span>
@@ -150,7 +155,7 @@
         </div>
     </div>
 
-    <div id="templatesSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-slate-800 rounded-t-2xl shadow-2xl z-[999999] p-4 pb-6">
+    <div id="templatesSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-slate-800 rounded-t-2xl shadow-2xl z-[50000] p-4 pb-6">
         <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer close-sheet-trigger"></div>
         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Хранилище шаблонов</h3>
         <select id="templateSelect" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs mb-3 focus:outline-none text-slate-300"></select>
@@ -314,8 +319,4 @@
 
                     const onMove = (evt) => {
                         const cX = evt.touches ? evt.touches[0].clientX : evt.clientX;
-                        const cY = evt.touches ? evt.touches[0].clientY : evt.clientY;
-                        let curX = cX - startX;
-                        let curY = cY - startY;
-
-                        if (Math.a
+                        const cY = evt.touches ? evt.touches[
