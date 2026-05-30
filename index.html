@@ -32,26 +32,26 @@
         @keyframes dash { to { stroke-dashoffset: -20; } }
     </style>
 </head>
-<body class="bg-[#060913] text-slate-100 h-screen w-screen overflow-hidden flex flex-col font-sans select-none">
+<body class="bg-[#060913] text-slate-100 h-screen w-screen overflow-hidden flex flex-col font-sans select-none m-0 p-0">
 
-    <header class="h-14 border-b border-slate-800 flex items-center justify-between px-4 bg-[#0a101f]/90 backdrop-blur-md shrink-0 z-[9999] relative">
+    <header class="fixed top-0 left-0 right-0 h-14 border-b border-slate-800 flex items-center justify-between px-4 bg-[#0a101f]/95 backdrop-blur-md shrink-0 z-[999999]">
         <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-sky-400">widgets</span>
             <span class="font-bold text-sm tracking-wide bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">UI Sandbox</span>
         </div>
         <div class="flex items-center gap-2">
-            <button id="pwaInstallBtn" class="hidden py-1.5 px-2.5 bg-amber-500 text-slate-950 rounded-lg text-xs font-bold flex items-center gap-1 shadow-md">
+            <button id="pwaInstallBtn" ontouchstart="handleInstallClick(event)" onclick="handleInstallClick(event)" class="hidden py-1.5 px-2.5 bg-amber-500 text-slate-950 rounded-lg text-xs font-bold flex items-center gap-1 shadow-md">
                 <span class="material-symbols-outlined text-sm">download</span> Установить
             </button>
-            <button onclick="openSheet('templatesSheet')" class="p-2 hover:bg-slate-800 rounded-xl text-slate-400 flex items-center"><span class="material-symbols-outlined text-xl">folder</span></button>
-            <button onclick="clearCanvas()" class="p-2 hover:bg-rose-950/40 rounded-xl text-rose-400 flex items-center"><span class="material-symbols-outlined text-xl">delete</span></button>
-            <button onclick="openSheet('creatorSheet')" class="py-2 px-4 bg-sky-500 hover:bg-sky-400 text-slate-950 rounded-xl text-xs font-black flex items-center gap-1 shadow-lg">
+            <button ontouchstart="openSheet('templatesSheet'); event.stopPropagation();" onclick="openSheet('templatesSheet'); event.stopPropagation();" class="p-2 hover:bg-slate-800 rounded-xl text-slate-400 flex items-center"><span class="material-symbols-outlined text-xl">folder</span></button>
+            <button ontouchstart="clearCanvas(); event.stopPropagation();" onclick="clearCanvas(); event.stopPropagation();" class="p-2 hover:bg-rose-950/40 rounded-xl text-rose-400 flex items-center"><span class="material-symbols-outlined text-xl">delete</span></button>
+            <button ontouchstart="openSheet('creatorSheet'); event.stopPropagation();" onclick="openSheet('creatorSheet'); event.stopPropagation();" class="py-2 px-4 bg-sky-500 hover:bg-sky-400 text-slate-950 rounded-xl text-xs font-black flex items-center gap-1 shadow-lg shadow-sky-500/10">
                 <span class="material-symbols-outlined text-sm font-bold">add</span> Создать
             </button>
         </div>
     </header>
 
-    <main id="canvas" class="flex-1 relative overflow-hidden canvas-grid p-4 z-10">
+    <main id="canvas" class="w-full absolute bottom-0 left-0 right-0 top-14 overflow-hidden canvas-grid z-10">
         <svg id="svgLayer" style="pointer-events: none;" class="absolute inset-0 w-full h-full z-20">
             </svg>
 
@@ -64,22 +64,22 @@
         </div>
     </main>
 
-    <div id="creatorSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-slate-800 rounded-t-2xl shadow-2xl z-[10000] p-4 pb-6">
-        <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4" onclick="closeAllSheets()"></div>
+    <div id="creatorSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-slate-800 rounded-t-2xl shadow-2xl z-[9999999] p-4 pb-6">
+        <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4" ontouchstart="closeAllSheets()" onclick="closeAllSheets()"></div>
         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Добавить на холст</h3>
         <div class="grid grid-cols-2 gap-3 text-xs font-medium">
-            <button onclick="spawnElement('card')" class="flex items-center gap-3 p-3.5 bg-slate-800 rounded-xl"><span class="material-symbols-outlined text-purple-400">layers</span>Контейнер-Карта</button>
-            <button onclick="spawnElement('button')" class="flex items-center gap-3 p-3.5 bg-slate-800 rounded-xl"><span class="material-symbols-outlined text-blue-400">smart_button</span>Кнопка действия</button>
-            <button onclick="spawnCurve()" class="flex items-center gap-3 p-3.5 bg-indigo-950 border border-indigo-500/30 rounded-xl"><span class="material-symbols-outlined text-indigo-400">timeline</span>Направленная линия</button>
-            <button onclick="spawnElement('text')" class="flex items-center gap-3 p-3.5 bg-slate-800 rounded-xl"><span class="material-symbols-outlined text-amber-400">text_fields</span>Текст / Заголовок</button>
+            <button ontouchstart="spawnElement('card')" onclick="spawnElement('card')" class="flex items-center gap-3 p-3.5 bg-slate-800 rounded-xl"><span class="material-symbols-outlined text-purple-400">layers</span>Контейнер-Карта</button>
+            <button ontouchstart="spawnElement('button')" onclick="spawnElement('button')" class="flex items-center gap-3 p-3.5 bg-slate-800 rounded-xl"><span class="material-symbols-outlined text-blue-400">smart_button</span>Кнопка действия</button>
+            <button ontouchstart="spawnCurve()" onclick="spawnCurve()" class="flex items-center gap-3 p-3.5 bg-indigo-950 border border-indigo-500/30 rounded-xl"><span class="material-symbols-outlined text-indigo-400">timeline</span>Направленная линия</button>
+            <button ontouchstart="spawnElement('text')" onclick="spawnElement('text')" class="flex items-center gap-3 p-3.5 bg-slate-800 rounded-xl"><span class="material-symbols-outlined text-amber-400">text_fields</span>Текст / Заголовок</button>
         </div>
     </div>
 
-    <div id="lineInspectorSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-indigo-900/50 rounded-t-2xl shadow-2xl z-[10000] p-4 max-h-[80vh] overflow-y-auto no-scrollbar pb-6">
-        <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-3" onclick="closeAllSheets()"></div>
+    <div id="lineInspectorSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-indigo-900/50 rounded-t-2xl shadow-2xl z-[9999999] p-4 max-h-[80vh] overflow-y-auto no-scrollbar pb-6">
+        <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-3" ontouchstart="closeAllSheets()" onclick="closeAllSheets()"></div>
         <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-4">
             <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-sm">polyline</span>Параметры линии</span>
-            <button onclick="closeAllSheets()" class="text-slate-400 text-lg">&times;</button>
+            <button ontouchstart="closeAllSheets()" onclick="closeAllSheets()" class="text-slate-400 text-lg">&times;</button>
         </div>
         <div class="space-y-4 text-xs">
             <div>
@@ -93,23 +93,23 @@
             <div>
                 <label class="block text-slate-400 mb-1.5">Цвет подсветки:</label>
                 <div class="grid grid-cols-4 gap-2">
-                    <button onclick="updateLineStyle('color', '#38bdf8')" class="p-2 bg-sky-500 rounded-lg text-slate-950 font-bold">Циан</button>
-                    <button onclick="updateLineStyle('color', '#a855f7')" class="p-2 bg-purple-500 rounded-lg text-white font-bold">Пурпур</button>
-                    <button onclick="updateLineStyle('color', '#f43f5e')" class="p-2 bg-rose-500 rounded-lg text-white font-bold">Роза</button>
-                    <button onclick="updateLineStyle('color', '#eab308')" class="p-2 bg-yellow-500 rounded-lg text-slate-950 font-bold">Лайм</button>
+                    <button ontouchstart="updateLineStyle('color', '#38bdf8')" onclick="updateLineStyle('color', '#38bdf8')" class="p-2 bg-sky-500 rounded-lg text-slate-950 font-bold">Циан</button>
+                    <button ontouchstart="updateLineStyle('color', '#a855f7')" onclick="updateLineStyle('color', '#a855f7')" class="p-2 bg-purple-500 rounded-lg text-white font-bold">Пурпур</button>
+                    <button ontouchstart="updateLineStyle('color', '#f43f5e')" onclick="updateLineStyle('color', '#f43f5e')" class="p-2 bg-rose-500 rounded-lg text-white font-bold">Роза</button>
+                    <button ontouchstart="updateLineStyle('color', '#eab308')" onclick="updateLineStyle('color', '#eab308')" class="p-2 bg-yellow-500 rounded-lg text-slate-950 font-bold">Лайм</button>
                 </div>
             </div>
             <div class="pt-2">
-                <button onclick="deleteLine()" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl">Удалить линию</button>
+                <button ontouchstart="deleteLine()" onclick="deleteLine()" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl">Удалить линию</button>
             </div>
         </div>
     </div>
 
-    <div id="inspectorSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-sky-900/40 rounded-t-2xl shadow-2xl z-[10000] p-4 max-h-[80vh] overflow-y-auto no-scrollbar pb-6">
-        <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-3" onclick="closeAllSheets()"></div>
+    <div id="inspectorSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-sky-900/40 rounded-t-2xl shadow-2xl z-[9999999] p-4 max-h-[80vh] overflow-y-auto no-scrollbar pb-6">
+        <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-3" ontouchstart="closeAllSheets()" onclick="closeAllSheets()"></div>
         <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-4">
             <span class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-sm">tune</span> Стили элемента</span>
-            <button onclick="closeAllSheets()" class="text-slate-400 text-lg">&times;</button>
+            <button ontouchstart="closeAllSheets()" onclick="closeAllSheets()" class="text-slate-400 text-lg">&times;</button>
         </div>
         <div class="space-y-4 text-xs">
             <div>
@@ -119,11 +119,11 @@
             <div>
                 <label class="block text-slate-400 mb-1.5">Фон и Градиенты:</label>
                 <div class="grid grid-cols-3 gap-2">
-                    <button onclick="applyStyle('bgType', 'solid')" class="p-2 bg-slate-800 rounded-lg">Сплошной</button>
-                    <button onclick="applyStyle('bgType', 'grad1')" class="p-2 bg-gradient-to-r from-purple-600 to-pink-500 rounded-lg text-[10px]">Пурпур-Град</button>
-                    <button onclick="applyStyle('bgType', 'grad2')" class="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg text-[10px]">Океан-Град</button>
-                    <button onclick="applyStyle('bgType', 'glass')" class="p-2 bg-white/10 border border-white/10 rounded-lg">Стекло</button>
-                    <button onclick="applyStyle('bgType', 'cyber')" class="p-2 bg-black border border-yellow-400 rounded-lg text-yellow-400">Cyber</button>
+                    <button ontouchstart="applyStyle('bgType', 'solid')" onclick="applyStyle('bgType', 'solid')" class="p-2 bg-slate-800 rounded-lg">Сплошной</button>
+                    <button ontouchstart="applyStyle('bgType', 'grad1')" onclick="applyStyle('bgType', 'grad1')" class="p-2 bg-gradient-to-r from-purple-600 to-pink-500 rounded-lg text-[10px]">Пурпур-Град</button>
+                    <button ontouchstart="applyStyle('bgType', 'grad2')" onclick="applyStyle('bgType', 'grad2')" class="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg text-[10px]">Океан-Град</button>
+                    <button ontouchstart="applyStyle('bgType', 'glass')" onclick="applyStyle('bgType', 'glass')" class="p-2 bg-white/10 border border-white/10 rounded-lg">Стекло</button>
+                    <button ontouchstart="applyStyle('bgType', 'cyber')" onclick="applyStyle('bgType', 'cyber')" class="p-2 bg-black border border-yellow-400 rounded-lg text-yellow-400">Cyber</button>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-3">
@@ -145,19 +145,19 @@
                 </div>
             </div>
             <div class="pt-2 flex gap-2">
-                <button onclick="duplicateElement()" class="flex-1 py-3 bg-slate-800 text-slate-200 rounded-xl font-bold">Дублировать</button>
-                <button onclick="deleteElement()" class="flex-1 py-3 bg-rose-600 text-white rounded-xl font-bold">Удалить</button>
+                <button ontouchstart="duplicateElement()" onclick="duplicateElement()" class="flex-1 py-3 bg-slate-800 text-slate-200 rounded-xl font-bold">Дублировать</button>
+                <button ontouchstart="deleteElement()" onclick="deleteElement()" class="flex-1 py-3 bg-rose-600 text-white rounded-xl font-bold">Удалить</button>
             </div>
         </div>
     </div>
 
-    <div id="templatesSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-slate-800 rounded-t-2xl shadow-2xl z-[10000] p-4 pb-6">
-        <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4" onclick="closeAllSheets()"></div>
+    <div id="templatesSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-slate-800 rounded-t-2xl shadow-2xl z-[9999999] p-4 pb-6">
+        <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4" ontouchstart="closeAllSheets()" onclick="closeAllSheets()"></div>
         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Хранилище шаблонов</h3>
         <select id="templateSelect" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs mb-3 focus:outline-none text-slate-300"></select>
         <div class="flex gap-2">
-            <button onclick="loadTemplate()" class="flex-1 py-3 bg-slate-800 rounded-xl text-xs font-bold">Загрузить</button>
-            <button onclick="saveCurrentAsTemplate()" class="flex-1 py-3 bg-sky-600 text-slate-950 rounded-xl text-xs font-bold">Сохранить</button>
+            <button ontouchstart="loadTemplate()" onclick="loadTemplate()" class="flex-1 py-3 bg-slate-800 rounded-xl text-xs font-bold">Загрузить</button>
+            <button ontouchstart="saveCurrentAsTemplate()" onclick="saveCurrentAsTemplate()" class="flex-1 py-3 bg-sky-600 text-slate-950 rounded-xl text-xs font-bold">Сохранить</button>
         </div>
     </div>
 
@@ -206,6 +206,7 @@
             canvasContent.appendChild(el);
             bindTouchDrag(el);
             selectElement(el);
+            closeAllSheets();
         }
 
         function spawnCurve() {
@@ -230,6 +231,7 @@
             renderPath(path);
             bindLineTouch(path);
             selectLine(path);
+            closeAllSheets();
         }
 
         function renderPath(path) {
@@ -262,7 +264,6 @@
             openSheet('lineInspectorSheet');
         }
 
-        // Общая очистка фокуса со всех объектов
         function unselectAll() {
             document.querySelectorAll('.sandbox-item').forEach(i => i.style.outline = 'none');
             document.querySelectorAll('path').forEach(p => p.classList.remove('line-selected'));
@@ -303,35 +304,4 @@
 
                 const moveHandler = (evt) => move(evt.type === 'touchmove' ? evt.touches[0] : evt);
                 const endHandler = () => {
-                    window.removeEventListener('touchmove', moveHandler);
-                    window.removeEventListener('mousemove', moveHandler);
-                    window.removeEventListener('touchend', endHandler);
-                    window.removeEventListener('mouseup', endHandler);
-                    if (!hasMoved) selectElement(el);
-                };
-
-                window.addEventListener('touchmove', moveHandler, {passive: false});
-                window.addEventListener('mousemove', moveHandler);
-                window.addEventListener('touchend', endHandler);
-                window.addEventListener('mouseup', endHandler);
-            }
-
-            function move(e) {
-                let curX = e.clientX - startX;
-                let curY = e.clientY - startY;
-
-                if (Math.abs(curX - initX) > CLICK_THRESHOLD || Math.abs(curY - initY) > CLICK_THRESHOLD) {
-                    hasMoved = true;
-                }
-
-                initX = curX; initY = curY;
-                el.dataset.x = initX; el.dataset.y = initY;
-                el.style.transform = `translate3d(${initX}px, ${initY}px, 0)`;
-            }
-        }
-
-        function bindLineTouch(path) {
-            let startX, startY, hasMoved = false;
-
-            path.addEventListener('touchstart', (e) => start(e.touches[0]), {passive: true});
-            path.addEventListener('mou
+                    wi
