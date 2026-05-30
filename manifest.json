@@ -1,0 +1,17 @@
+{
+  "name": "UI Sandbox",
+  "short_name": "UI Sandbox",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#38bdf8",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3426/3426653.png",
+      "sizes": "512px",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
