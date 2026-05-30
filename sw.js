@@ -1,7 +1,8 @@
-const CACHE_NAME = 'ui-sandbox-v3';
+const CACHE_NAME = 'ui-sandbox-v5';
 const ASSETS = [
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './icon.png'
 ];
 
 self.addEventListener('install', (e) => {
@@ -12,7 +13,6 @@ self.addEventListener('install', (e) => {
   );
 });
 
-// Нативный Fetch-обработчик, который удовлетворяет критериям установки Chrome/Safari
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((response) => {
