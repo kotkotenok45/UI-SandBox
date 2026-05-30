@@ -18,19 +18,13 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
         .bottom-sheet {
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.25s;
-            visibility: visible;
-        }
-        /* Когда шторка скрыта, мы полностью убираем её из интерактивного поля с помощью visibility: hidden */
-        .sheet-hidden { 
-            transform: translateY(100%); 
-            visibility: hidden; 
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        .neon-glow-line {
+        .neon-line {
             transition: stroke-width 0.1s, filter 0.2s;
         }
-        .line-selected {
+        .line-active {
             stroke-dasharray: 6;
             animation: dash 1s linear infinite;
         }
@@ -39,7 +33,7 @@
 </head>
 <body class="bg-[#060913] text-slate-100 h-screen w-screen overflow-hidden flex flex-col font-sans select-none m-0 p-0">
 
-    <header class="h-14 border-b border-slate-800 flex items-center justify-between px-4 bg-[#0a101f] shrink-0 relative z-[9999]">
+    <header class="h-14 border-b border-slate-800 flex items-center justify-between px-4 bg-[#0a101f] shrink-0 relative z-50">
         <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-sky-400">widgets</span>
             <span class="font-bold text-sm tracking-wide bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent">UI Sandbox</span>
@@ -48,275 +42,277 @@
             <button id="pwaInstallBtn" class="hidden py-1.5 px-2.5 bg-amber-500 text-slate-950 rounded-lg text-xs font-bold flex items-center gap-1 shadow-md cursor-pointer">
                 <span class="material-symbols-outlined text-sm">download</span> Установить
             </button>
-            <button id="btnTemplates" class="p-2 hover:bg-slate-800 rounded-xl text-slate-400 flex items-center cursor-pointer"><span class="material-symbols-outlined text-xl">folder</span></button>
-            <button id="btnClear" class="p-2 hover:bg-rose-950/40 rounded-xl text-rose-400 flex items-center cursor-pointer"><span class="material-symbols-outlined text-xl">delete</span></button>
-            <button id="btnCreate" class="py-2 px-4 bg-sky-500 hover:bg-sky-400 text-slate-950 rounded-xl text-xs font-black flex items-center gap-1 shadow-lg cursor-pointer">
+            <button id="hdrTemplates" class="p-2 hover:bg-slate-800 rounded-xl text-slate-400 flex items-center cursor-pointer">
+                <span class="material-symbols-outlined text-xl">folder</span>
+            </button>
+            <button id="hdrClear" class="p-2 hover:bg-rose-950/40 rounded-xl text-rose-400 flex items-center cursor-pointer">
+                <span class="material-symbols-outlined text-xl">delete</span>
+            </button>
+            <button id="hdrCreate" class="py-2 px-4 bg-sky-500 hover:bg-sky-400 text-slate-950 rounded-xl text-xs font-black flex items-center gap-1 shadow-lg cursor-pointer">
                 <span class="material-symbols-outlined text-sm font-bold">add</span> Создать
             </button>
         </div>
     </header>
 
-    <main id="canvas" class="w-full h-[calc(100vh-3.5rem)] relative overflow-hidden canvas-grid z-10 block">
-        <svg id="svgLayer" class="absolute inset-0 w-full h-full z-20 overflow-visible"></svg>
+    <main id="sandboxCanvas" class="flex-1 relative overflow-hidden canvas-grid z-10">
+        <svg id="canvasSvg" class="absolute inset-0 w-full h-full z-20 overflow-visible pointer-events-none"></svg>
         
-        <div id="canvasContent" class="w-full h-full absolute inset-0 z-30">
-            <div id="placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-slate-600 z-0 pointer-events-none">
-                <span class="material-symbols-outlined text-5xl mb-2 text-slate-700">grid_view</span>
-                <p class="text-sm font-medium">Песочница пуста</p>
-                <p class="text-xs max-w-xs mt-1">Добавляйте интерфейсные blocks и линии через меню «Создать».</p>
-            </div>
+        <div id="canvasHtml" class="absolute inset-0 w-full h-full z-30 pointer-events-none"></div>
+
+        <div id="canvasPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-slate-600 z-0 pointer-events-none">
+            <span class="material-symbols-outlined text-5xl mb-2 text-slate-700">grid_view</span>
+            <p class="text-sm font-medium">Песочница пуста</p>
+            <p class="text-xs max-w-xs mt-1">Добавляйте интерфейсные блоки и линии через меню «Создать».</p>
         </div>
     </main>
 
-    <div id="creatorSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-slate-800 rounded-t-2xl shadow-2xl z-[50000] p-4 pb-6">
-        <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer close-sheet-trigger"></div>
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Добавить на холст</h3>
-        <div class="grid grid-cols-2 gap-3 text-xs font-medium">
-            <button id="spawnCard" class="flex items-center gap-3 p-3.5 bg-slate-800 rounded-xl cursor-pointer"><span class="material-symbols-outlined text-purple-400">layers</span>Контейнер-Карта</button>
-            <button id="spawnButton" class="flex items-center gap-3 p-3.5 bg-slate-800 rounded-xl cursor-pointer"><span class="material-symbols-outlined text-blue-400">smart_button</span>Кнопка действия</button>
-            <button id="spawnLine" class="flex items-center gap-3 p-3.5 bg-indigo-950 border border-indigo-500/30 rounded-xl cursor-pointer"><span class="material-symbols-outlined text-indigo-400">timeline</span>Направленная линия</button>
-            <button id="spawnText" class="flex items-center gap-3 p-3.5 bg-slate-800 rounded-xl cursor-pointer"><span class="material-symbols-outlined text-amber-400">text_fields</span>Текст / Заголовок</button>
+    <div id="sheetOverlay" class="fixed inset-0 z-40 pointer-events-none flex flex-col justify-end">
+        
+        <div id="sheetCreate" class="bottom-sheet translate-y-full w-full max-w-md mx-auto bg-[#0a101f] border-t border-slate-800 rounded-t-2xl shadow-2xl p-4 pb-6 pointer-events-auto">
+            <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer btn-close-sheet"></div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Добавить на холст</h3>
+            <div class="grid grid-cols-2 gap-3 text-xs font-medium">
+                <button id="addCard" class="flex items-center gap-3 p-3.5 bg-slate-800 rounded-xl cursor-pointer"><span class="material-symbols-outlined text-purple-400">layers</span>Контейнер-Карта</button>
+                <button id="addButton" class="flex items-center gap-3 p-3.5 bg-slate-800 rounded-xl cursor-pointer"><span class="material-symbols-outlined text-blue-400">smart_button</span>Кнопка действия</button>
+                <button id="addLine" class="flex items-center gap-3 p-3.5 bg-indigo-950 border border-indigo-500/30 rounded-xl cursor-pointer"><span class="material-symbols-outlined text-indigo-400">timeline</span>Направленная линия</button>
+                <button id="addText" class="flex items-center gap-3 p-3.5 bg-slate-800 rounded-xl cursor-pointer"><span class="material-symbols-outlined text-amber-400">text_fields</span>Текст / Заголовок</button>
+            </div>
         </div>
-    </div>
 
-    <div id="lineInspectorSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-indigo-900/50 rounded-t-2xl shadow-2xl z-[50000] p-4 max-h-[80vh] overflow-y-auto no-scrollbar pb-6">
-        <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-3 cursor-pointer close-sheet-trigger"></div>
-        <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-4">
-            <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-sm">polyline</span>Параметры линии</span>
-            <button class="text-slate-400 text-lg cursor-pointer close-sheet-trigger">&times;</button>
-        </div>
-        <div class="space-y-4 text-xs">
-            <div>
-                <div class="flex justify-between text-slate-400 mb-1"><span>Изгиб линии:</span><span id="curveVal">0</span></div>
-                <input type="range" id="inputCurvature" min="-250" max="250" value="50" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none accent-indigo-500">
+        <div id="sheetBlockInspector" class="bottom-sheet translate-y-full w-full max-w-md mx-auto bg-[#0a101f] border-t border-sky-900/40 rounded-t-2xl shadow-2xl p-4 max-h-[80vh] overflow-y-auto no-scrollbar pb-6 pointer-events-auto">
+            <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-3 cursor-pointer btn-close-sheet"></div>
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-4">
+                <span class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-sm">tune</span> Стили элемента</span>
+                <button class="text-slate-400 text-lg cursor-pointer btn-close-sheet">&times;</button>
             </div>
-            <div>
-                <div class="flex justify-between text-slate-400 mb-1"><span>Толщина:</span><span id="widthVal">3px</span></div>
-                <input type="range" id="inputWidth" min="1" max="15" value="4" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none accent-indigo-500">
-            </div>
-            <div>
-                <label class="block text-slate-400 mb-1.5">Цвет подсветки:</label>
-                <div class="grid grid-cols-4 gap-2" id="lineColorsContainer">
-                    <button data-color="#38bdf8" class="p-2 bg-sky-500 rounded-lg text-slate-950 font-bold cursor-pointer">Циан</button>
-                    <button data-color="#a855f7" class="p-2 bg-purple-500 rounded-lg text-white font-bold cursor-pointer">Пурпур</button>
-                    <button data-color="#f43f5e" class="p-2 bg-rose-500 rounded-lg text-white font-bold cursor-pointer">Роза</button>
-                    <button data-color="#eab308" class="p-2 bg-yellow-500 rounded-lg text-slate-950 font-bold cursor-pointer">Лайм</button>
-                </div>
-            </div>
-            <div class="pt-2">
-                <button id="btnDeleteLine" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl cursor-pointer">Удалить линию</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="inspectorSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-sky-900/40 rounded-t-2xl shadow-2xl z-[50000] p-4 max-h-[80vh] overflow-y-auto no-scrollbar pb-6">
-        <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-3 cursor-pointer close-sheet-trigger"></div>
-        <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-4">
-            <span class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-sm">tune</span> Стили элемента</span>
-            <button class="text-slate-400 text-lg cursor-pointer close-sheet-trigger">&times;</button>
-        </div>
-        <div class="space-y-4 text-xs">
-            <div>
-                <label class="block text-slate-400 mb-1">Текст контента:</label>
-                <input type="text" id="styleText" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-slate-200 focus:outline-none">
-            </div>
-            <div>
-                <label class="block text-slate-400 mb-1.5">Фон и Градиенты:</label>
-                <div class="grid grid-cols-3 gap-2" id="bgStylesContainer">
-                    <button data-bg="solid" class="p-2 bg-slate-800 rounded-lg cursor-pointer">Сплошной</button>
-                    <button data-bg="grad1" class="p-2 bg-gradient-to-r from-purple-600 to-pink-500 rounded-lg text-[10px] cursor-pointer">Пурпур-Град</button>
-                    <button data-bg="grad2" class="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg text-[10px] cursor-pointer">Океан-Град</button>
-                    <button data-bg="glass" class="p-2 bg-white/10 border border-white/10 rounded-lg cursor-pointer">Стекло</button>
-                    <button data-bg="cyber" class="p-2 bg-black border border-yellow-400 rounded-lg text-yellow-400 cursor-pointer">Cyber</button>
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-4 text-xs">
                 <div>
-                    <label class="block text-slate-400 mb-1">Скругление углов:</label>
-                    <select id="styleRadius" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 focus:outline-none text-slate-200">
-                        <option value="rounded-none">Острые</option>
-                        <option value="rounded-xl" selected>Обычное</option>
-                        <option value="rounded-3xl">Круглое</option>
-                    </select>
+                    <label class="block text-slate-400 mb-1">Текст контента:</label>
+                    <input type="text" id="insBlockText" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-slate-200 focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1">Свечение / Тень:</label>
-                    <select id="styleShadow" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 focus:outline-none text-slate-200">
-                        <option value="shadow-none">Без тени</option>
-                        <option value="shadow-[0_0_20px_rgba(139,92,246,0.4)]">Фиолетовый неон</option>
-                        <option value="shadow-[0_0_20px_rgba(6,182,212,0.4)]">Циан неон</option>
-                    </select>
+                    <label class="block text-slate-400 mb-1.5">Фон и Градиенты:</label>
+                    <div class="grid grid-cols-3 gap-2" id="insBlockBgGrid">
+                        <button data-bg="solid" class="p-2 bg-slate-800 rounded-lg cursor-pointer">Сплошной</button>
+                        <button data-bg="grad1" class="p-2 bg-gradient-to-r from-purple-600 to-pink-500 rounded-lg text-[10px] cursor-pointer">Пурпур-Град</button>
+                        <button data-bg="grad2" class="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg text-[10px] cursor-pointer">Океан-Град</button>
+                        <button data-bg="glass" class="p-2 bg-white/10 border border-white/10 rounded-lg cursor-pointer">Стекло</button>
+                        <button data-bg="cyber" class="p-2 bg-black border border-yellow-400 rounded-lg text-yellow-400 cursor-pointer">Cyber</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Скругление углов:</label>
+                        <select id="insBlockRadius" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 focus:outline-none text-slate-200">
+                            <option value="rounded-none">Острые</option>
+                            <option value="rounded-xl" selected>Обычное</option>
+                            <option value="rounded-3xl">Круглое</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 mb-1">Свечение / Тень:</label>
+                        <select id="insBlockShadow" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 focus:outline-none text-slate-200">
+                            <option value="shadow-none">Без тени</option>
+                            <option value="shadow-[0_0_20px_rgba(139,92,246,0.4)]">Фиолетовый неон</option>
+                            <option value="shadow-[0_0_20px_rgba(6,182,212,0.4)]">Циан неон</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button id="btnDuplicateBlock" class="flex-1 py-3 bg-slate-800 text-slate-200 rounded-xl font-bold cursor-pointer">Дублировать</button>
+                    <button id="btnDeleteBlock" class="flex-1 py-3 bg-rose-600 text-white rounded-xl font-bold cursor-pointer">Удалить</button>
                 </div>
             </div>
-            <div class="pt-2 flex gap-2">
-                <button id="btnDuplicate" class="flex-1 py-3 bg-slate-800 text-slate-200 rounded-xl font-bold cursor-pointer">Дублировать</button>
-                <button id="btnDeleteElement" class="flex-1 py-3 bg-rose-600 text-white rounded-xl font-bold cursor-pointer">Удалить</button>
+        </div>
+
+        <div id="sheetLineInspector" class="bottom-sheet translate-y-full w-full max-w-md mx-auto bg-[#0a101f] border-t border-indigo-900/50 rounded-t-2xl shadow-2xl p-4 max-h-[80vh] overflow-y-auto no-scrollbar pb-6 pointer-events-auto">
+            <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-3 cursor-pointer btn-close-sheet"></div>
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-4">
+                <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1"><span class="material-symbols-outlined text-sm">polyline</span>Параметры линии</span>
+                <button class="text-slate-400 text-lg cursor-pointer btn-close-sheet">&times;</button>
+            </div>
+            <div class="space-y-4 text-xs">
+                <div>
+                    <div class="flex justify-between text-slate-400 mb-1"><span>Изгиб линии:</span><span id="valCurvature">0</span></div>
+                    <input type="range" id="insLineCurvature" min="-250" max="250" value="50" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none accent-indigo-500">
+                </div>
+                <div>
+                    <div class="flex justify-between text-slate-400 mb-1"><span>Толщина:</span><span id="valWidth">4px</span></div>
+                    <input type="range" id="insLineWidth" min="1" max="15" value="4" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none accent-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1.5">Цвет подсветки:</label>
+                    <div class="grid grid-cols-4 gap-2" id="insLineColorGrid">
+                        <button data-color="#38bdf8" class="p-2 bg-sky-500 rounded-lg text-slate-950 font-bold cursor-pointer">Циан</button>
+                        <button data-color="#a855f7" class="p-2 bg-purple-500 rounded-lg text-white font-bold cursor-pointer">Пурпур</button>
+                        <button data-color="#f43f5e" class="p-2 bg-rose-500 rounded-lg text-white font-bold cursor-pointer">Роза</button>
+                        <button data-color="#eab308" class="p-2 bg-yellow-500 rounded-lg text-slate-950 font-bold cursor-pointer">Лайм</button>
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <button id="btnDeleteLine" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl cursor-pointer">Удалить линию</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div id="templatesSheet" class="bottom-sheet sheet-hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0a101f] border-t border-slate-800 rounded-t-2xl shadow-2xl z-[50000] p-4 pb-6">
-        <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer close-sheet-trigger"></div>
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Хранилище шаблонов</h3>
-        <select id="templateSelect" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs mb-3 focus:outline-none text-slate-300"></select>
-        <div class="flex gap-2">
-            <button id="btnLoadTemplate" class="flex-1 py-3 bg-slate-800 rounded-xl text-xs font-bold cursor-pointer">Загрузить</button>
-            <button id="btnSaveTemplate" class="flex-1 py-3 bg-sky-600 text-slate-950 rounded-xl text-xs font-bold cursor-pointer">Сохранить</button>
+        <div id="sheetTemplates" class="bottom-sheet translate-y-full w-full max-w-md mx-auto bg-[#0a101f] border-t border-slate-800 rounded-t-2xl shadow-2xl p-4 pb-6 pointer-events-auto">
+            <div class="w-12 h-1 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer btn-close-sheet"></div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Хранилище шаблонов</h3>
+            <select id="templateSelect" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs mb-3 focus:outline-none text-slate-300"></select>
+            <div class="flex gap-2">
+                <button id="btnTemplateLoad" class="flex-1 py-3 bg-slate-800 rounded-xl text-xs font-bold cursor-pointer">Загрузить</button>
+                <button id="btnTemplateSave" class="flex-1 py-3 bg-sky-600 text-slate-950 rounded-xl text-xs font-bold cursor-pointer">Сохранить</button>
+            </div>
         </div>
+
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const canvas = document.getElementById('canvas');
-            const canvasContent = document.getElementById('canvasContent');
-            const svgLayer = document.getElementById('svgLayer');
-            const placeholder = document.getElementById('placeholder');
+            // Элементы DOM холста
+            const canvas = document.getElementById('sandboxCanvas');
+            const canvasHtml = document.getElementById('canvasHtml');
+            const canvasSvg = document.getElementById('canvasSvg');
+            const placeholder = document.getElementById('canvasPlaceholder');
             
             let activeElement = null;
             let activeLine = null;
-            const CLICK_THRESHOLD = 5; 
+            const MOVE_THRESHOLD = 6;
 
+            // --- КОРРЕКТНОЕ УПРАВЛЕНИЕ МЕНЮ И ШТОРКАМИ ---
             function openSheet(id) {
                 closeAllSheets();
-                const sheet = document.getElementById(id);
-                if(sheet) sheet.classList.remove('sheet-hidden');
+                const target = document.getElementById(id);
+                if (target) target.classList.remove('translate-y-full');
             }
 
             function closeAllSheets() {
-                document.querySelectorAll('.bottom-sheet').forEach(sheet => sheet.classList.add('sheet-hidden'));
-            }
-
-            function spawnElement(type) {
-                if(placeholder) placeholder.style.display = 'none';
-                const el = document.createElement('div');
-                el.className = 'sandbox-item absolute p-4 bg-slate-800 rounded-xl border border-slate-700/60 shadow-lg touch-none select-none z-30 font-sans cursor-grab';
-                
-                const top = Math.floor(Math.random() * 25) + 20;
-                const left = Math.floor(Math.random() * 15) + 15;
-                el.style.top = `${top}%`;
-                el.style.left = `${left}%`;
-                el.style.width = '210px';
-
-                if (type === 'card') {
-                    el.className += ' bg-gradient-to-r from-purple-600 to-indigo-600';
-                    el.innerHTML = `<h4 class="font-bold text-white text-xs pointer-events-none">Смарт-контейнер</h4><p class="text-[10px] text-purple-100/70 mt-0.5 pointer-events-none">Тапни — настроишь.</p>`;
-                } else if (type === 'button') {
-                    el.style.width = '150px';
-                    el.innerHTML = `<button class="w-full py-2 bg-sky-500 text-slate-950 font-black text-[10px] rounded-lg uppercase tracking-wider pointer-events-none">Кнопка</button>`;
-                } else if (type === 'text') {
-                    el.style.width = '170px';
-                    el.className = 'sandbox-item absolute p-1 border border-transparent touch-none z-30 cursor-grab';
-                    el.innerHTML = `<p class="text-sm font-black bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent pointer-events-none">Кастомный Текст</p>`;
-                }
-
-                if(canvasContent) canvasContent.appendChild(el);
-                bindTouchDrag(el);
-                selectElement(el);
-                closeAllSheets();
-            }
-
-            function spawnCurve() {
-                if(placeholder) placeholder.style.display = 'none';
-                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                
-                const w = canvas ? canvas.clientWidth : window.innerWidth;
-                const h = canvas ? canvas.clientHeight : window.innerHeight;
-                
-                path.dataset.x1 = w * 0.25; path.dataset.y1 = h * 0.35;
-                path.dataset.x2 = w * 0.70; path.dataset.y2 = h * 0.45;
-                path.dataset.curvature = "60"; 
-                
-                path.setAttribute("fill", "none");
-                path.setAttribute("stroke", "#38bdf8");
-                path.setAttribute("stroke-width", "6");
-                path.setAttribute("filter", "drop-shadow(0px 0px 8px #38bdf8)");
-                path.setAttribute("style", "cursor: pointer; pointer-events: stroke;");
-                path.setAttribute("class", "neon-glow-line");
-                
-                if(svgLayer) svgLayer.appendChild(path);
-                renderPath(path);
-                bindLineTouch(path);
-                selectLine(path);
-                closeAllSheets();
-            }
-
-            function renderPath(path) {
-                const x1 = parseFloat(path.dataset.x1); const y1 = parseFloat(path.dataset.y1);
-                const x2 = parseFloat(path.dataset.x2); const y2 = parseFloat(path.dataset.y2);
-                const curv = parseFloat(path.dataset.curvature);
-                const midX = (x1 + x2) / 2;
-                const midY = ((y1 + y2) / 2) + curv;
-                path.setAttribute("d", `M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}`);
-            }
-
-            function selectElement(el) {
-                unselectAll();
-                activeElement = el;
-                el.style.outline = '2px solid #38bdf8';
-                const input = document.getElementById('styleText');
-                if(input) input.value = el.innerText || '';
-                openSheet('inspectorSheet');
-            }
-
-            function selectLine(path) {
-                unselectAll();
-                activeLine = path;
-                path.classList.add('line-selected');
-                
-                const inputCurv = document.getElementById('inputCurvature');
-                const curvVal = document.getElementById('curveVal');
-                const inputW = document.getElementById('inputWidth');
-                const widthVal = document.getElementById('widthVal');
-
-                if(inputCurv) inputCurv.value = path.dataset.curvature;
-                if(curvVal) curvVal.textContent = path.dataset.curvature;
-                if(inputW) inputW.value = path.getAttribute('stroke-width');
-                if(widthVal) widthVal.textContent = path.getAttribute('stroke-width') + 'px';
-                
-                openSheet('lineInspectorSheet');
+                document.querySelectorAll('.bottom-sheet').forEach(s => s.classList.add('translate-y-full'));
             }
 
             function unselectAll() {
                 document.querySelectorAll('.sandbox-item').forEach(i => i.style.outline = 'none');
-                document.querySelectorAll('path').forEach(p => p.classList.remove('line-selected'));
+                document.querySelectorAll('path').forEach(p => p.classList.remove('line-active'));
                 activeElement = null;
                 activeLine = null;
             }
 
-            function updateLineStyle(type, val) {
-                if (!activeLine) return;
-                if (type === 'curvature') {
-                    activeLine.dataset.curvature = val;
-                    const cVal = document.getElementById('curveVal');
-                    if(cVal) cVal.textContent = val;
-                    renderPath(activeLine);
-                } else if (type === 'width') {
-                    activeLine.setAttribute('stroke-width', val);
-                    const wVal = document.getElementById('widthVal');
-                    if(wVal) wVal.textContent = val + 'px';
-                } else if (type === 'color') {
-                    activeLine.setAttribute('stroke', val);
-                    activeLine.setAttribute('filter', `drop-shadow(0px 0px 10px ${val})`);
+            function syncPlaceholder() {
+                if (canvasHtml.children.length === 0 && canvasSvg.children.length === 0) {
+                    placeholder.style.display = 'flex';
+                } else {
+                    placeholder.style.display = 'none';
                 }
             }
 
-            function bindTouchDrag(el) {
-                let startX, startY, initX = 0, initY = 0;
-                let hasMoved = false;
+            // --- ЛОГИКА СОЗДАНИЯ И ПЕРЕМЕЩЕНИЯ БЛОКОВ ---
+            function createBlock(type) {
+                placeholder.style.display = 'none';
+                const item = document.createElement('div');
+                
+                // Классы по умолчанию (pointer-events: auto возвращает интерактивность одиночному блоку)
+                item.className = 'sandbox-item absolute p-4 bg-slate-800 rounded-xl border border-slate-700/60 shadow-lg touch-none select-none pointer-events-auto cursor-grab z-30 font-sans';
+                
+                // Рандомный спавн строго внутри границ холста
+                const rx = Math.floor(Math.random() * 20) + 20;
+                const ry = Math.floor(Math.random() * 20) + 20;
+                item.style.left = `${rx}%`;
+                item.style.top = `${ry}%`;
+                item.style.width = '210px';
 
-                if (el.dataset.x) initX = parseFloat(el.dataset.x);
-                if (el.dataset.y) initY = parseFloat(el.dataset.y);
-                el.style.transform = `translate3d(${initX}px, ${initY}px, 0)`;
+                if (type === 'card') {
+                    item.className += ' bg-gradient-to-r from-purple-600 to-indigo-600';
+                    item.innerHTML = `<h4 class="font-bold text-white text-xs pointer-events-none">Смарт-контейнер</h4><p class="text-[10px] text-purple-100/70 mt-0.5 pointer-events-none">Тапни — настроишь.</p>`;
+                } else if (type === 'button') {
+                    item.style.width = '150px';
+                    item.innerHTML = `<button class="w-full py-2 bg-sky-500 text-slate-950 font-black text-[10px] rounded-lg uppercase tracking-wider pointer-events-none">Кнопка</button>`;
+                } else if (type === 'text') {
+                    item.style.width = '170px';
+                    item.className = 'sandbox-item absolute p-1 border border-transparent touch-none select-none pointer-events-auto cursor-grab z-30';
+                    item.innerHTML = `<p class="text-sm font-black bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent pointer-events-none">Custom Text</p>`;
+                }
 
-                const onStart = (e) => {
+                canvasHtml.appendChild(item);
+                setupDragAndTap(item);
+                selectBlock(item);
+                closeAllSheets();
+            }
+
+            function setupDragAndTap(el) {
+                let currentX = 0, currentY = 0;
+                let startX = 0, startY = 0;
+                let moved = false;
+
+                if(el.dataset.x) currentX = parseFloat(el.dataset.x);
+                if(el.dataset.y) currentY = parseFloat(el.dataset.y);
+                el.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+
+                const dragStart = (e) => {
                     if (e.button !== undefined && e.button !== 0) return;
-                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                    
-                    startX = clientX - initX;
-                    startY = clientY - initY;
-                    hasMoved = false;
+                    const cX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const cY = e.touches ? e.touches[0].clientY : e.clientY;
+                    startX = cX - currentX;
+                    startY = cY - currentY;
+                    moved = false;
 
-                    const onMove = (evt) => {
-                        const cX = evt.touches ? evt.touches[0].clientX : evt.clientX;
-                        const cY = evt.touches ? evt.touches[
+                    const dragMove = (evt) => {
+                        const moveX = evt.touches ? evt.touches[0].clientX : evt.clientX;
+                        const moveY = evt.touches ? evt.touches[0].clientY : evt.clientY;
+                        let nextX = moveX - startX;
+                        let nextY = moveY - startY;
+
+                        if (Math.abs(nextX - currentX) > MOVE_THRESHOLD || Math.abs(nextY - currentY) > MOVE_THRESHOLD) {
+                            moved = true;
+                        }
+                        currentX = nextX; currentY = nextY;
+                        el.dataset.x = currentX; el.dataset.y = currentY;
+                        el.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+                    };
+
+                    const dragEnd = () => {
+                        window.removeEventListener('mousemove', dragMove);
+                        window.removeEventListener('touchmove', dragMove);
+                        window.removeEventListener('mouseup', dragEnd);
+                        window.removeEventListener('touchend', dragEnd);
+                        if (!moved) selectBlock(el);
+                    };
+
+                    window.addEventListener('mousemove', dragMove);
+                    window.addEventListener('touchmove', dragMove, {passive:false});
+                    window.addEventListener('mouseup', dragEnd);
+                    window.addEventListener('touchend', dragEnd);
+                };
+                el.addEventListener('mousedown', dragStart);
+                el.addEventListener('touchstart', dragStart, {passive:true});
+            }
+
+            function selectBlock(el) {
+                unselectAll();
+                activeElement = el;
+                el.style.outline = '2px solid #38bdf8';
+                document.getElementById('insBlockText').value = el.innerText || '';
+                openSheet('sheetBlockInspector');
+            }
+
+            // --- ЛОГИКА СОЗДАНИЯ И ПЕРЕМЕЩЕНИЯ НЕОНОВЫХ ЛИНИЙ ---
+            function createLine() {
+                placeholder.style.display = 'none';
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                
+                const w = canvas.clientWidth || window.innerWidth;
+                const h = canvas.clientHeight || window.innerHeight;
+
+                path.dataset.x1 = w * 0.2; path.dataset.y1 = h * 0.3;
+                path.dataset.x2 = w * 0.7; path.dataset.y2 = h * 0.4;
+                path.dataset.curvature = "60";
+
+                path.setAttribute("fill", "none");
+                path.setAttribute("stroke", "#38bdf8");
+                path.setAttribute("stroke-width", "5");
+                path.setAttribute("filter", "drop-shadow(0px 0px 8px #38bdf8)");
+                path.setAttribute("style", "cursor: pointer; pointer-events: stroke;");
+                path.setAttribute("class", "neon-line");
+
+                canvasSvg.appendChild(path);
+                renderLine(path);
+                setupLi
